@@ -1,0 +1,315 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>꾸꾸산책 - 하얀 스피츠와 함께하는 공원 산책 게임</title>
+<meta name="description" content="하얀 스피츠 꾸꾸와 둘이서 공원을 1200m 산책하는 캐주얼 게임. 브라우저에서 바로 플레이하세요!">
+<style>
+  :root{
+    --bg:#fffaf3; --card:#ffffff; --ink:#3b3226; --sub:#7a6d5c;
+    --orange:#ff8a50; --orange-d:#e0703a; --green:#86c96a; --green-d:#2f5a2c;
+    --path:#ecdcb3; --line:#efe4d2; --pink:#f07fa4; --blue:#4f86d9;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;line-height:1.65;word-break:keep-all}
+  a{color:inherit}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+
+  /* 상단 메뉴 */
+  header{position:sticky;top:0;z-index:10;background:rgba(255,250,243,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .logo{font-weight:800;font-size:20px;color:var(--orange-d);text-decoration:none}
+  nav a{margin-left:18px;text-decoration:none;color:var(--sub);font-weight:600;font-size:15px}
+  nav a:hover{color:var(--orange-d)}
+
+  /* 히어로 */
+  .hero{background:linear-gradient(180deg,#bfe6a8 0%,var(--green) 100%);position:relative;overflow:hidden}
+  .hero::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:220px;transform:translateX(-50%);
+    background:var(--path);opacity:.55;z-index:0}
+  .hero .wrap{position:relative;z-index:1;text-align:center;padding:80px 20px 90px}
+  .hero .dog{font-size:84px;line-height:1;filter:drop-shadow(0 6px 8px rgba(0,0,0,.15))}
+  .hero h1{font-size:clamp(40px,8vw,68px);margin:12px 0 4px;color:#fff;
+    text-shadow:0 3px 0 var(--orange-d),0 6px 14px rgba(0,0,0,.18)}
+  .hero p.lead{font-size:clamp(17px,2.4vw,21px);color:#24401f;margin:0 0 30px;font-weight:600}
+  .btn{display:inline-block;background:var(--orange);color:#fff;text-decoration:none;font-weight:800;
+    padding:15px 34px;border-radius:999px;font-size:18px;box-shadow:0 5px 0 var(--orange-d);transition:transform .1s}
+  .btn:hover{transform:translateY(-2px)}
+  .btn.ghost{background:#fff;color:var(--orange-d);box-shadow:0 5px 0 #e9d9c3;margin-left:10px}
+  .badges{margin-top:28px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .badges span{background:rgba(255,255,255,.85);padding:6px 14px;border-radius:999px;font-size:14px;font-weight:600}
+
+  section{padding:72px 0;scroll-margin-top:60px}
+  section.alt{background:#fff}
+  h2{font-size:clamp(26px,4vw,34px);margin:0 0 8px;text-align:center}
+  .sub{text-align:center;color:var(--sub);margin:0 0 40px}
+
+  /* 게임 플레이 */
+  .play-area{display:flex;gap:36px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
+  .phone{width:min(400px,100%);aspect-ratio:480/800;background:#222;border-radius:34px;padding:12px;
+    box-shadow:0 20px 40px rgba(0,0,0,.2)}
+  .phone iframe{width:100%;height:100%;border:0;border-radius:24px;display:block;background:var(--green-d)}
+  .side{max-width:380px;flex:1 1 300px}
+  .side h3{margin:0 0 10px}
+  .quick li{margin-bottom:6px}
+  .note{background:#fff4e6;border:1px dashed #f3c99b;border-radius:14px;padding:14px 16px;font-size:14px;color:#6b5434;margin-top:16px}
+  kbd{display:inline-block;min-width:26px;text-align:center;padding:2px 8px;border-radius:7px;background:#fff;
+    border:1px solid #d8ccb8;border-bottom-width:3px;font-family:inherit;font-weight:700;font-size:14px}
+
+  /* 카드 그리드 */
+  .grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px}
+  section.alt .card{background:var(--bg)}
+  .card .ico{font-size:40px;line-height:1;margin-bottom:10px}
+  .card h3{margin:0 0 6px;font-size:19px}
+  .card p{margin:0;color:var(--sub);font-size:15px}
+
+  /* 순서 */
+  .steps{counter-reset:s;display:grid;gap:16px;max-width:760px;margin:0 auto}
+  .step{display:flex;gap:16px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px}
+  .step::before{counter-increment:s;content:counter(s);flex:none;width:36px;height:36px;border-radius:50%;
+    background:var(--orange);color:#fff;font-weight:800;display:grid;place-items:center}
+  .step b{display:block;margin-bottom:2px}
+  .step span{color:var(--sub);font-size:15px}
+
+  /* 표 */
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line);font-size:15px}
+  th{background:#fff1e0;font-size:14px;color:#6b5434}
+  tr:last-child td{border-bottom:0}
+  .plus{color:#2e8b3e;font-weight:800}.minus{color:#d64545;font-weight:800}
+  .two{display:grid;gap:24px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+  .two h3{margin:0 0 12px}
+
+  .stars .row{display:flex;gap:14px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 18px;margin-bottom:12px}
+  .stars .s{font-size:22px;min-width:96px}
+
+  /* FAQ */
+  details{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 20px;margin:0 auto 12px;max-width:760px}
+  section.alt details{background:var(--bg)}
+  summary{font-weight:700;cursor:pointer}
+  details p{margin:10px 0 0;color:var(--sub)}
+
+  footer{background:var(--green-d);color:#d7ead0;text-align:center;padding:40px 20px;font-size:14px}
+  footer .big{font-size:22px;font-weight:800;color:#fff;margin-bottom:6px}
+
+  @media (max-width:640px){
+    nav{display:none}
+    .btn.ghost{margin:12px 0 0}
+    section{padding:56px 0}
+    .wrap{padding:0 16px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="logo" href="#top">🐾 꾸꾸산책</a>
+    <nav>
+      <a href="#play">게임하기</a>
+      <a href="#about">소개</a>
+      <a href="#howto">게임하는 법</a>
+      <a href="#controls">조작법</a>
+      <a href="#score">점수</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+  </div>
+</header>
+
+<!-- 히어로 -->
+<div class="hero" id="top">
+  <div class="wrap">
+    <div class="dog">🐕‍🦺</div>
+    <h1>꾸꾸산책</h1>
+    <p class="lead">하얀 스피츠 꾸꾸와 둘이서 떠나는 1200m 공원 산책!</p>
+    <a class="btn" href="#play">▶ 지금 바로 산책하기</a>
+    <a class="btn ghost" href="#howto">게임하는 법 보기</a>
+    <div class="badges">
+      <span>💻 PC · 📱 모바일 지원</span>
+      <span>⚡ 설치 없이 브라우저에서</span>
+      <span>🆓 무료</span>
+    </div>
+  </div>
+</div>
+
+<!-- 게임 플레이 -->
+<section id="play">
+  <div class="wrap">
+    <h2>🎮 바로 플레이하기</h2>
+    <p class="sub">화면을 한 번 클릭(탭)하면 산책이 시작돼요.</p>
+    <div class="play-area">
+      <div class="phone">
+        <iframe src="game.html" title="꾸꾸산책 게임" allow="autoplay"></iframe>
+      </div>
+      <div class="side">
+        <h3>빠른 조작 요약</h3>
+        <ul class="quick">
+          <li><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / 방향키 — 이동</li>
+          <li><kbd>Space</kbd> 꾹 누르기 — 목줄 꽉 잡기</li>
+          <li><kbd>E</kbd> — 응가 줍기</li>
+          <li><kbd>Q</kbd> — 목줄 교대</li>
+          <li><kbd>P</kbd> — 일시정지 · <kbd>M</kbd> — 소리 끄기</li>
+        </ul>
+        <div class="note">
+          💡 키보드가 안 먹히면 게임 화면을 한 번 클릭해 주세요.<br>
+          📱 휴대폰에서는 화면을 드래그해서 이동하고, 오른쪽 아래 버튼으로 줍기·꽉 잡기·교대를 해요.<br>
+          <a href="game.html" target="_blank" rel="noopener">→ 전체 화면으로 열기</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 소개 -->
+<section class="alt" id="about">
+  <div class="wrap">
+    <h2>🌳 게임 소개</h2>
+    <p class="sub">꾸꾸의 기분을 챙기면서, 매너 있게, 다치지 않고 끝까지 걸어가는 산책 게임이에요.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="ico">🐶</div>
+        <h3>꾸꾸</h3>
+        <p>복슬복슬한 하얀 스피츠. 냄새 맡기와 간식을 좋아하고, 다람쥐만 보면 참지 못해요. 기분이 좋으면 꼬리를 신나게 흔들어요.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🙋‍♂️</div>
+        <h3>남자 (파란 옷)</h3>
+        <p>응가 치우기 담당! 목줄을 잡고 있지 않을 때도 버튼만 누르면 직접 달려가서 깨끗하게 치워 줘요.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🙋‍♀️</div>
+        <h3>여자 (분홍 옷)</h3>
+        <p>옆에서 함께 걸으며 꾸꾸를 응원해요. 둘이 가까이 있으면 언제든 목줄을 넘겨받을 수 있어요.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🏁</div>
+        <h3>목표: 1200m 완주</h3>
+        <p>공원 산책로를 따라 위로 쭉! 하트 3개와 꾸꾸의 기분을 지키면서 결승선까지 도착하면 성공이에요.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 게임하는 법 -->
+<section id="howto">
+  <div class="wrap">
+    <h2>📖 게임하는 법</h2>
+    <p class="sub">목줄을 잡은 사람을 움직이면 꾸꾸가 알아서 따라와요. 이렇게만 하면 돼요!</p>
+    <div class="steps">
+      <div class="step"><div><b>앞으로 걸어가기</b><span>산책로를 따라 위쪽으로 이동하세요. 화면 위쪽 막대에 진행 거리가 표시돼요.</span></div></div>
+      <div class="step"><div><b>킁킁 냄새 맡게 해주기 👃</b><span>소화전·가로등·덤불·표지판 근처로 가면 꾸꾸가 냄새를 맡아요. 노란 원이 다 찰 때까지 기다려 주면 기분이 크게 올라가요.</span></div></div>
+      <div class="step"><div><b>간식 뼈다귀 먹기 🦴</b><span>길에 떨어진 뼈다귀 쪽으로 가면 꾸꾸가 냠! 점수와 기분이 올라가요.</span></div></div>
+      <div class="step"><div><b>응가는 꼭 치우기 💩</b><span>꾸꾸가 응가를 하면 남자가 치워야 해요. 남자가 목줄을 잡았다면 가까이 가서 <kbd>E</kbd>, 여자가 잡았다면 <kbd>E</kbd>를 눌러 남자를 보내세요. 그냥 지나치면 감점!</span></div></div>
+      <div class="step"><div><b>다람쥐 출현! 꽉 잡기 🐿️</b><span>꾸꾸가 다람쥐를 보고 흥분하면 <kbd>Space</kbd>를 꾹 눌러 목줄을 짧게 잡으세요. 초록 게이지가 차면 진정해요. 안 잡고 있으면 끌려가다 넘어져요.</span></div></div>
+      <div class="step"><div><b>자전거 피하기 🚲</b><span>화면 위에 빨간 🚲 경고가 뜨면 곧 자전거가 내려와요. 사람과 꾸꾸 모두 길을 비켜 주세요.</span></div></div>
+      <div class="step"><div><b>목줄 교대하기 🔁</b><span>두 사람이 가까이 있을 때 <kbd>Q</kbd>를 누르면 목줄을 넘겨요. 다람쥐를 쫓는 중이거나 응가를 치우는 중엔 안 돼요.</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 조작법 -->
+<section class="alt" id="controls">
+  <div class="wrap">
+    <h2>🕹️ 조작법</h2>
+    <p class="sub">PC와 모바일 모두 즐길 수 있어요.</p>
+    <div class="two">
+      <div>
+        <h3>💻 PC (키보드)</h3>
+        <table>
+          <tr><th>동작</th><th>키</th></tr>
+          <tr><td>이동</td><td><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 또는 방향키</td></tr>
+          <tr><td>목줄 꽉 잡기 (누르고 있기)</td><td><kbd>Space</kbd></td></tr>
+          <tr><td>응가 줍기</td><td><kbd>E</kbd> / <kbd>J</kbd> / <kbd>Enter</kbd></td></tr>
+          <tr><td>목줄 교대</td><td><kbd>Q</kbd> / <kbd>K</kbd> / <kbd>Tab</kbd></td></tr>
+          <tr><td>일시정지</td><td><kbd>P</kbd> / <kbd>Esc</kbd></td></tr>
+          <tr><td>소리 켜기/끄기</td><td><kbd>M</kbd></td></tr>
+        </table>
+      </div>
+      <div>
+        <h3>📱 모바일 (터치)</h3>
+        <table>
+          <tr><th>동작</th><th>방법</th></tr>
+          <tr><td>이동</td><td>화면 아무 곳이나 누르고 드래그 (가상 조이스틱)</td></tr>
+          <tr><td>목줄 꽉 잡기</td><td>✊ <b>꽉 잡기</b> 버튼 누르고 있기</td></tr>
+          <tr><td>응가 줍기</td><td>💩 <b>줍기</b> 버튼</td></tr>
+          <tr><td>목줄 교대</td><td>🔁 <b>교대</b> 버튼</td></tr>
+          <tr><td>일시정지</td><td>오른쪽 위 ❚❚ 버튼</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 점수 -->
+<section id="score">
+  <div class="wrap">
+    <h2>⭐ 점수 & 게임 규칙</h2>
+    <p class="sub">높은 점수를 노린다면 꾸꾸의 기분과 하트를 끝까지 지키세요!</p>
+    <div class="two">
+      <div>
+        <h3>점수표</h3>
+        <table>
+          <tr><th>행동</th><th>점수</th></tr>
+          <tr><td>🦴 뼈다귀 먹기</td><td class="plus">+10</td></tr>
+          <tr><td>💩 응가 치우기 (매너 산책)</td><td class="plus">+15</td></tr>
+          <tr><td>👃 냄새 맡기 완료</td><td class="plus">+20</td></tr>
+          <tr><td>🐿️ 흥분한 꾸꾸 진정시키기</td><td class="plus">+25</td></tr>
+          <tr><td>😶 응가 안 치우고 지나감</td><td class="minus">−20</td></tr>
+          <tr><td>🏁 완주 보너스 (기분)</td><td class="plus">남은 기분 × 2</td></tr>
+          <tr><td>🏁 완주 보너스 (하트)</td><td class="plus">남은 하트 × 30</td></tr>
+        </table>
+      </div>
+      <div>
+        <h3>게임 오버 조건</h3>
+        <div class="grid" style="grid-template-columns:1fr;gap:12px;margin-bottom:24px">
+          <div class="card"><h3>💔 하트 0개</h3><p>자전거에 부딪히거나, 다람쥐 쫓는 꾸꾸에게 끌려가다 넘어지면 하트가 하나씩 줄어요.</p></div>
+          <div class="card"><h3>😢 꾸꾸 기분 0</h3><p>기분은 시간이 갈수록 줄어들고, 멀리 갈수록 더 빨리 떨어져요. 냄새 맡기와 간식으로 채워 주세요.</p></div>
+        </div>
+        <h3>완주 별점</h3>
+        <div class="stars">
+          <div class="row"><span class="s">⭐⭐⭐</span><span>기분 60 이상 · 응가 놓침 0 · 하트 3개 그대로</span></div>
+          <div class="row"><span class="s">⭐⭐</span><span>기분 35 이상 · 응가 놓침 1번 이하</span></div>
+          <div class="row"><span class="s">⭐</span><span>무사히 완주!</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 팁 -->
+<section class="alt" id="tips">
+  <div class="wrap">
+    <h2>💡 고수의 산책 팁</h2>
+    <p class="sub">별 3개를 받고 싶다면?</p>
+    <div class="grid">
+      <div class="card"><div class="ico">🐢</div><h3>서두르지 마세요</h3><p>냄새 맡기는 기분을 +18이나 올려줘요. 길가의 냄새 포인트는 웬만하면 들러 주세요.</p></div>
+      <div class="card"><div class="ico">👀</div><h3>다람쥐를 먼저 보기</h3><p>다람쥐는 50m 이후부터 양옆에서 튀어나와요. 꾸꾸가 짖으면 바로 Space!</p></div>
+      <div class="card"><div class="ico">🔁</div><h3>교대를 활용하기</h3><p>여자가 목줄을 잡으면 남자가 자유롭게 응가를 치우러 갈 수 있어서 훨씬 편해요.</p></div>
+      <div class="card"><div class="ico">🚲</div><h3>가운데를 비우기</h3><p>80m 이후로 자전거가 점점 많아져요. 빨간 경고가 보이면 길 가장자리로 피하세요.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="wrap">
+    <h2>❓ 자주 묻는 질문</h2>
+    <p class="sub">&nbsp;</p>
+    <details><summary>설치해야 하나요?</summary><p>아니요! 웹 브라우저(크롬, 엣지, 사파리 등)에서 바로 플레이할 수 있어요.</p></details>
+    <details><summary>최고 점수는 저장되나요?</summary><p>네, 최고 점수는 지금 사용하는 브라우저에 자동으로 저장돼요. 시작 화면에서 확인할 수 있어요.</p></details>
+    <details><summary>키보드를 눌러도 움직이지 않아요.</summary><p>게임 화면을 한 번 클릭해서 게임에 포커스를 맞춰 주세요. 다른 곳을 클릭하면 자동으로 일시정지돼요.</p></details>
+    <details><summary>소리가 안 나요.</summary><p>브라우저 정책상 화면을 한 번 클릭하거나 키를 눌러야 소리가 켜져요. <kbd>M</kbd> 키로 소리를 껐는지도 확인해 보세요.</p></details>
+  </div>
+</section>
+
+<footer>
+  <div class="big">🐾 꾸꾸산책</div>
+  <div>오늘도 꾸꾸와 함께 즐거운 산책 되세요!</div>
+  <div style="margin-top:14px;opacity:.7">© 2026 꾸꾸산책</div>
+</footer>
+
+</body>
+</html>
