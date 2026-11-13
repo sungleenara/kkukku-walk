@@ -27,7 +27,7 @@ if (!CanvasRenderingContext2D.prototype.roundRect) {
 const W = 480, H = 800;
 const FONT = 'system-ui, "Malgun Gothic", "Apple SD Gothic Neo", sans-serif';
 const AX = 240, AY = 430, AR = 200;   // 돗자리(경기장) 중심과 반지름
-const GOAL = 12;                      // 냠냠 12번 먹으면 우승
+const GOAL = 10;                      // 냠냠 10번 먹으면 우승
 const TIME = 60;                      // 제한 시간 (초)
 let S = 1, DPR = 1;
 
@@ -73,18 +73,21 @@ function text(s, x, y, size, color = '#333', align = 'center', weight = 'bold', 
 // ---------- 강아지 정보 ----------
 const DOGS = {
   gwiri: {
+    skill: 'fire', skillName: '불꽃 발사', icon: '🔥', scd: 2.6,
     name: '귀리', desc: '제일 작고 제일 빨라요', sub: '베이지 포메라니안',
     r: 21, speed: 182, mass: 0.8, dash: 440, cd: 0.9, pitch: 1.35,
     main: '#ecc48e', light: '#f8e2bf', line: '#b98a52', ear: '#f3b3a2',
     head: 13.5, body: [13, 11], earH: 6, earW: 8, fluff: 4.2, tail: 8.5, hx: 7, hy: -22,
   },
   kkukku: {
+    skill: 'water', skillName: '물대포', icon: '💧', scd: 2.4,
     name: '꾸꾸', desc: '묵직해서 잘 안 밀려요', sub: '하얀 스피츠',
     r: 27, speed: 168, mass: 1.25, dash: 410, cd: 1.1, pitch: 1.0,
     main: '#ffffff', light: '#eef0f5', line: '#b8bfcc', ear: '#f7c3cd',
     head: 12, body: [16, 12], earH: 9, earW: 9.5, fluff: 3.4, tail: 8, hx: 10, hy: -24,
   },
   nutti: {
+    skill: 'bolt', skillName: '번개', icon: '⚡', scd: 3.0,
     name: '누띠', desc: '박치기가 제일 세요', sub: '스피츠 + 치와와',
     r: 25, speed: 170, mass: 1.0, dash: 480, cd: 1.0, pitch: 1.15,
     main: '#ffffff', light: '#f3efe8', line: '#b4916a', ear: '#f5bba8', patch: '#d9ad74',
@@ -116,6 +119,9 @@ const sfx = {
   grab: () => tone('sine', 500, 900, 0.1, 0.08),
   nom: () => { tone('sine', 520, 700, 0.06, 0.07); tone('sine', 620, 820, 0.06, 0.07, 0.08); },
   pop: () => tone('triangle', 400, 1000, 0.12, 0.06),
+  fire: () => { tone('sawtooth', 300, 90, 0.3, 0.05); tone('triangle', 700, 200, 0.2, 0.04); },
+  water: () => { for (let i = 0; i < 4; i++) tone('sine', rand(500, 900), rand(200, 400), 0.07, 0.05, i * 0.04); },
+  zap: () => { tone('square', 1400, 200, 0.18, 0.04); tone('sawtooth', 90, 60, 0.25, 0.06); },
   beep: f => tone('sine', f, f, 0.15, 0.08),
   win: () => [523, 659, 784, 1046].forEach((f, i) => tone('triangle', f, f, 0.18, 0.08, i * 0.13)),
 };
@@ -123,8 +129,9 @@ const sfx = {
 // ---------- 입력 ----------
 const K = {};
 const joy = { active: false, id: null, bx: 0, by: 0, x: 0, y: 0 };
-const DASH_BTN = { x: 402, y: 722, r: 46 };
-let dashQueued = false;
+const DASH_BTN = { x: 410, y: 712, r: 44 };
+const SKILL_BTN = { x: 318, y: 750, r: 36 };
+let dashQueued = false, skillQueued = false;
 let isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0 || matchMedia('(pointer: coarse)').matches;
 
 addEventListener('keydown', e => {
@@ -139,6 +146,7 @@ addEventListener('keydown', e => {
     if (k === ' ' || k === 'enter') startGame(ORDER[G.sel]);
   } else if (G.scene === 'play') {
     if (k === ' ' || k === 'j' || k === 'shift') dashQueued = true;
+    if (k === 'k' || k === 'e' || k === 'x') skillQueued = true;
   } else if (G.scene === 'over' && G.t > 1) {
     if (k === ' ' || k === 'enter') startGame(G.playerKey);
     if (k === 'escape' || k === 'backspace') toTitle();
@@ -157,8 +165,9 @@ cv.addEventListener('pointerdown', ev => {
   const p = toGame(ev);
   if (G.scene === 'title') { titleTap(p); return; }
   if (G.scene === 'over') { overTap(p); return; }
-  if (Math.hypot(p.x - DASH_BTN.x, p.y - DASH_BTN.y) < DASH_BTN.r + 14) { dashQueued = true; return; }
-  if (ev.pointerType === 'mouse' && !isTouch) { dashQueued = true; return; }   // 마우스 클릭 = 박치기
+  if (Math.hypot(p.x - SKILL_BTN.x, p.y - SKILL_BTN.y) < SKILL_BTN.r + 8) { skillQueued = true; return; }
+  if (Math.hypot(p.x - DASH_BTN.x, p.y - DASH_BTN.y) < DASH_BTN.r + 8) { dashQueued = true; return; }
+  if (ev.pointerType === 'mouse') { if (ev.button === 2) skillQueued = true; else dashQueued = true; return; }   // 왼클릭 = 박치기, 오른클릭 = 필살기
   if (!joy.active) {
     joy.active = true; joy.id = ev.pointerId; joy.bx = joy.x = p.x; joy.by = joy.y = p.y;
     try { cv.setPointerCapture(ev.pointerId); } catch (e) {}
@@ -167,12 +176,13 @@ cv.addEventListener('pointerdown', ev => {
 cv.addEventListener('pointermove', ev => {
   if (joy.active && ev.pointerId === joy.id) { const p = toGame(ev); joy.x = p.x; joy.y = p.y; }
 });
+cv.addEventListener('contextmenu', e => e.preventDefault());
 const joyEnd = ev => { if (ev.pointerId === joy.id) { joy.active = false; joy.id = null; } };
 cv.addEventListener('pointerup', joyEnd);
 cv.addEventListener('pointercancel', joyEnd);
 
 // ---------- 게임 상태 ----------
-const G = { scene: 'title', sel: 0, diff: 1, t: 0, dogs: [], cup: null, fx: [], parts: [], time: TIME, count: 0, winner: null, playerKey: 'gwiri', shake: 0 };
+const G = { shots: [], bolts: [], scene: 'title', sel: 0, diff: 1, t: 0, dogs: [], cup: null, fx: [], parts: [], time: TIME, count: 0, winner: null, playerKey: 'gwiri', shake: 0 };
 
 function mkDog(key, i, human) {
   const T = DOGS[key];
@@ -183,7 +193,8 @@ function mkDog(key, i, human) {
     dirx: -Math.cos(a), diry: -Math.sin(a), face: Math.cos(a) > 0 ? -1 : 1,
     dashT: 0, cd: 0, dizzy: 0, bites: 0, eatT: 0, noPick: 0, grace: 0, phase: rand(0, 6),
     wantDash: false, hit: new Set(), chew: 0, happy: 0,
-    ai: { t: rand(0, .3), tx: AX, ty: AY, dash: false, wait: 0, spin: Math.random() < .5 ? -1 : 1 },
+    scd: 1.5, wantSkill: false, aimx: 1, aimy: 0, burn: 0, wet: 0, zap: 0,
+    ai: { t: rand(0, .3), tx: AX, ty: AY, dash: false, wait: 0, wait2: rand(1, 2.5), spin: Math.random() < .5 ? -1 : 1 },
   };
 }
 
@@ -192,8 +203,8 @@ function startGame(key) {
   const others = ORDER.filter(k => k !== key);
   G.dogs = [mkDog(key, 0, true), mkDog(others[0], 1, false), mkDog(others[1], 2, false)];
   G.cup = { holder: null, x: AX, y: AY, vx: 0, vy: 0, z: 0, vz: 0, spin: 0 };
-  G.fx = []; G.parts = []; G.time = TIME; G.count = 3.6; G.scene = 'count'; G.t = 0; G.winner = null; G.lastBeep = 4;
-  dashQueued = false;
+  G.fx = []; G.parts = []; G.shots = []; G.bolts = []; G.time = TIME; G.count = 3.6; G.scene = 'count'; G.t = 0; G.winner = null; G.lastBeep = 4;
+  dashQueued = skillQueued = false;
   sfx.pop();
 }
 function toTitle() { G.scene = 'title'; G.t = 0; }
@@ -221,6 +232,7 @@ function humanInput(d) {
   if (l > 1) { x /= l; y /= l; }
   d.ix = x; d.iy = y;
   if (dashQueued) { d.wantDash = true; dashQueued = false; }
+  if (skillQueued) { d.wantSkill = true; skillQueued = false; }
 }
 
 function aiInput(d, dt) {
@@ -268,6 +280,26 @@ function aiInput(d, dt) {
   if (A.dash && d.cd <= 0 && A.wait <= 0 && d.dizzy <= 0) {
     d.wantDash = true; A.dash = false; A.wait = rand(0.2, 0.9) / D.agg;
   }
+  A.wait2 -= dt;
+  if (d.scd <= 0 && d.dizzy <= 0 && A.wait2 <= 0) {
+    const tg = aiSkillTarget(d);
+    if (tg && Math.random() < dt * 2.5 * D.agg) {
+      const dx = tg.x - d.x, dy = tg.y - d.y, l = Math.hypot(dx, dy) || 1;
+      d.aimx = dx / l + rand(-0.15, 0.15) / D.agg; d.aimy = dy / l + rand(-0.15, 0.15) / D.agg;
+      d.wantSkill = true; A.wait2 = rand(0.4, 1.4) / D.agg;
+    }
+  }
+}
+
+const SKILL_RANGE = { fire: 260, water: 150, bolt: 230 };
+function aiSkillTarget(d) {
+  const cup = G.cup, range = SKILL_RANGE[d.T.skill];
+  const dist = o => Math.hypot(o.x - d.x, o.y - d.y);
+  const others = G.dogs.filter(o => o !== d && o.dizzy <= 0);
+  if (cup.holder && cup.holder !== d) return others.includes(cup.holder) && dist(cup.holder) < range ? cup.holder : null;
+  if (cup.holder === d) return others.filter(o => dist(o) < 110).sort((a, b) => dist(a) - dist(b))[0] || null;
+  const myD = Math.hypot(cup.x - d.x, cup.y - d.y);
+  return others.find(o => Math.hypot(cup.x - o.x, cup.y - o.y) < myD && dist(o) < range) || null;
 }
 
 function dogPhysics(d, dt) {
@@ -276,6 +308,10 @@ function dogPhysics(d, dt) {
   d.noPick = Math.max(0, d.noPick - dt);
   d.grace = Math.max(0, d.grace - dt);
   d.chew = Math.max(0, d.chew - dt);
+  d.scd = Math.max(0, d.scd - dt);
+  for (const k of ['burn', 'wet', 'zap']) d[k] = Math.max(0, d[k] - dt);
+  if (d.burn > 0 && Math.random() < 0.5) G.parts.push({ x: d.x + rand(-10, 10), y: d.y - d.T.r * 1.6, vx: rand(-10, 10), vy: rand(-50, -20), g: -30, t: 0, life: 0.7, c: pick(['rgba(90,90,90,.55)', '#ff922b', 'rgba(60,60,60,.45)']), s: rand(3, 6) });
+  if (d.wet > 0 && Math.random() < 0.45) G.parts.push({ x: d.x + rand(-14, 14), y: d.y - d.T.r * 1.4, vx: rand(-15, 15), vy: rand(-20, 10), t: 0, life: 0.5, c: pick(['#74c0fc', '#a5d8ff']), s: rand(2, 3.5) });
   const carry = G.cup.holder === d;
   if (d.dizzy > 0) {
     d.dizzy -= dt;
@@ -297,9 +333,9 @@ function dogPhysics(d, dt) {
       d.dashT = 0.24; d.cd = T.cd; d.hit.clear();
       sfx.bark(T.pitch);
       floatText(d.x, d.y - T.r * 2.6, pick(['왈!', '멍!', '왕!']), '#fff', 15);
-    }
+    } else if (d.wantSkill && d.scd <= 0) fireSkill(d);
   }
-  d.wantDash = false;
+  d.wantDash = false; d.wantSkill = false;
   if (d.dizzy <= 0 && Math.hypot(d.ix, d.iy) > 0.2) {
     const l = Math.hypot(d.ix, d.iy); d.dirx = d.ix / l; d.diry = d.iy / l;
   }
@@ -315,6 +351,76 @@ function dogPhysics(d, dt) {
   }
   const spd = Math.hypot(d.vx, d.vy);
   d.phase += dt * (6 + spd * 0.07);
+}
+
+function hitBy(vic, nx, ny, power, stun, label, color, status) {
+  const p = power / vic.T.mass;
+  vic.vx = vic.vx * 0.3 + nx * p; vic.vy = vic.vy * 0.3 + ny * p;
+  vic.dizzy = Math.max(vic.dizzy, stun); vic.dashT = 0;
+  const fresh = vic[status] < 0.6; vic[status] = 1.2;
+  if (fresh) { floatText(vic.x, vic.y - vic.T.r * 2.4, label, color, 20); G.shake = 0.12; }
+  if (G.cup.holder === vic) {
+    if (vic.grace <= 0) dropCup(vic, nx, ny);
+    else if (fresh) floatText(vic.x, vic.y - 50, '꽉!', '#fff', 14);
+  }
+}
+
+function fireSkill(d) {
+  const T = d.T; d.scd = T.scd;
+  let ax = d.human ? d.dirx : d.aimx, ay = d.human ? d.diry : d.aimy;
+  const l = Math.hypot(ax, ay) || 1; ax /= l; ay /= l;
+  if (Math.abs(ax) > 0.1) d.face = ax > 0 ? 1 : -1;
+  const m = mouthOf(d), sx = m.x, sy = m.y - 4;
+  if (T.skill === 'fire') {
+    G.shots.push({ owner: d, type: 'fire', x: sx, y: sy, vx: ax * 340, vy: ay * 340, t: 0, life: 0.85, r: 11 });
+    floatText(d.x, d.y - T.r * 2.6, '화르륵!', '#ff922b', 16); sfx.fire();
+  } else if (T.skill === 'water') {
+    const base = Math.atan2(ay, ax);
+    for (let i = -2; i <= 2; i++) {
+      const a = base + i * 0.14 + rand(-0.03, 0.03), v = rand(360, 420);
+      G.shots.push({ owner: d, type: 'water', x: sx, y: sy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, t: 0, life: 0.42, r: 7 });
+    }
+    floatText(d.x, d.y - T.r * 2.6, '촤아!', '#4dabf7', 16); sfx.water();
+  } else {
+    let best = null, bd = 250;
+    for (const o of G.dogs) {
+      if (o === d) continue;
+      const dx = o.x - d.x, dy = o.y - d.y, dist = Math.hypot(dx, dy);
+      if (dist > bd || dist < 1 || (dx * ax + dy * ay) / dist < 0.35) continue;
+      best = o; bd = dist;
+    }
+    const ex = best ? best.x : d.x + ax * 170, ey = best ? best.y - best.T.r * 0.8 : d.y + ay * 170;
+    G.bolts.push({ x1: sx, y1: sy - 4, x2: ex, y2: ey, t: 0, life: 0.32 });
+    burst(ex, ey, 12, ['#ffe066', '#fff', '#ffd43b'], 160, 0.4, 3);
+    floatText(d.x, d.y - T.r * 2.6, '번쩍!', '#ffd43b', 16); sfx.zap();
+    if (best) hitBy(best, ax, ay, 90, 1.0, '찌릿!', '#ffd43b', 'zap');
+  }
+}
+
+function shotsUpdate(dt) {
+  for (const s of G.shots) {
+    s.t += dt; s.x += s.vx * dt; s.y += s.vy * dt;
+    if (s.type === 'fire' && Math.random() < 0.9) G.parts.push({ x: s.x + rand(-4, 4), y: s.y + rand(-4, 4), vx: -s.vx * 0.1 + rand(-20, 20), vy: -s.vy * 0.1 + rand(-30, 0), g: -40, t: 0, life: 0.35, c: pick(['#ff922b', '#ffd43b', '#ff6b3d']), s: rand(3, 6) });
+    if (s.type === 'water' && Math.random() < 0.3) G.parts.push({ x: s.x, y: s.y, vx: rand(-15, 15), vy: rand(-10, 10), t: 0, life: 0.3, c: '#a5d8ff', s: 2 });
+    if (Math.hypot(s.x - AX, s.y - AY) > AR + 10) { s.t = s.life; continue; }
+    for (const o of G.dogs) {
+      if (o === s.owner) continue;
+      if (Math.hypot(o.x - s.x, o.y - o.T.r * 0.5 - s.y) < o.T.r * 0.85 + s.r) {
+        const l = Math.hypot(s.vx, s.vy) || 1;
+        if (s.type === 'fire') {
+          hitBy(o, s.vx / l, s.vy / l, 280, 0.75, '앗뜨!', '#ff6b3d', 'burn');
+          burst(s.x, s.y, 14, ['#ff922b', '#ffd43b', '#ff6b3d'], 150, 0.5, 4);
+        } else {
+          hitBy(o, s.vx / l, s.vy / l, 170, 0.3, '첨벙!', '#4dabf7', 'wet');
+          burst(s.x, s.y, 5, ['#74c0fc', '#d0ebff'], 100, 0.4, 3);
+        }
+        s.t = s.life; break;
+      }
+    }
+  }
+  G.shots = G.shots.filter(s => s.t < s.life);
+  for (const b of G.bolts) b.t += dt;
+  G.bolts = G.bolts.filter(b => b.t < b.life);
 }
 
 function knock(att, vic, nx, ny) {
@@ -409,7 +515,7 @@ function cupUpdate(dt) {
 function update(dt) {
   G.t += dt;
   G.shake = Math.max(0, G.shake - dt);
-  for (const p of G.parts) { p.t += dt; p.vy += 260 * dt; p.x += p.vx * dt; p.y += p.vy * dt; }
+  for (const p of G.parts) { p.t += dt; p.vy += (p.g ?? 260) * dt; p.x += p.vx * dt; p.y += p.vy * dt; }
   G.parts = G.parts.filter(p => p.t < p.life);
   for (const f of G.fx) f.t += dt;
   G.fx = G.fx.filter(f => f.t < f.life);
@@ -432,6 +538,7 @@ function update(dt) {
   for (const d of G.dogs) d.human ? humanInput(d) : aiInput(d, dt);
   for (const d of G.dogs) dogPhysics(d, dt);
   collide();
+  shotsUpdate(dt);
   cupUpdate(dt);
 
   const h = G.cup.holder;
@@ -455,7 +562,7 @@ function update(dt) {
 }
 
 function endGame(w) {
-  G.scene = 'over'; G.t = 0; G.winner = w;
+  G.scene = 'over'; G.t = 0; G.winner = w; G.shots = []; G.bolts = [];
   if (w) {
     const c = G.cup; c.holder = null; c.x = w.x + w.face * w.T.r * 1.4; c.y = w.y + 2; c.z = 0; c.vx = c.vy = c.vz = 0;
     burst(w.x, w.y - 30, 40, ['#ff8fb1', '#ffe066', '#8fd3ff', '#b6f09c', '#fff'], 260, 1.2, 5);
@@ -584,8 +691,16 @@ function drawDog(d, x, y, sc = 1, o = {}) {
   }
   ctx.restore();
 
+  if ((d.zap || 0) > 0.2) {
+    ctx.strokeStyle = '#ffd43b'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round';
+    for (let k = 0; k < 2; k++) {
+      ctx.beginPath(); let px = x + rand(-20, 20) * s, py = y - rand(5, 40) * s; ctx.moveTo(px, py);
+      for (let i = 0; i < 3; i++) { px += rand(-8, 8) * s; py += rand(3, 9) * s; ctx.lineTo(px, py); }
+      ctx.stroke();
+    }
+  }
   // 어지러운 별
-  if (dizzy) {
+  if (dizzy && !(d.zap > 0.2)) {
     for (let i = 0; i < 3; i++) {
       const a = time * 6 + i * 2.1;
       text('★', x + Math.cos(a) * 13 * s, y - hop + (hy - hr - 8) * s + Math.sin(a) * 4 * s, 10 * s + 3, '#ffd43b');
@@ -674,7 +789,7 @@ function drawHUD() {
 
 function drawTouchUI() {
   if (!isTouch) {
-    text('방향키/WASD 이동 · Space 박치기', W / 2, 676, 14, 'rgba(255,255,255,.95)', 'center', 'bold', 'rgba(60,110,40,.6)');
+    text('방향키/WASD 이동 · Space 박치기 · K 필살기', W / 2, 676, 14, 'rgba(255,255,255,.95)', 'center', 'bold', 'rgba(60,110,40,.6)');
     return;
   }
   const me = G.dogs.find(d => d.human);
@@ -683,7 +798,7 @@ function drawTouchUI() {
     const dx = joy.x - joy.bx, dy = joy.y - joy.by, l = Math.hypot(dx, dy), m = Math.min(l, 46);
     circle(joy.bx + (l ? dx / l * m : 0), joy.by + (l ? dy / l * m : 0), 22, 'rgba(255,255,255,.7)');
   } else {
-    text('화면을 끌어서 이동', 130, 724, 14, 'rgba(255,255,255,.9)', 'center', 'bold', 'rgba(60,110,40,.6)');
+    text('화면을 끌어서 이동', 120, 724, 14, 'rgba(255,255,255,.9)', 'center', 'bold', 'rgba(60,110,40,.6)');
   }
   const ready = me && me.cd <= 0;
   circle(DASH_BTN.x, DASH_BTN.y + 4, DASH_BTN.r, 'rgba(0,0,0,.15)');
@@ -694,6 +809,18 @@ function drawTouchUI() {
   }
   text('💥', DASH_BTN.x, DASH_BTN.y - 8, 22);
   text('박치기', DASH_BTN.x, DASH_BTN.y + 18, 13, '#fff');
+  if (me) {
+    const sr = me.scd <= 0, B = SKILL_BTN;
+    const col = { fire: '#ff922b', water: '#4dabf7', bolt: '#fcc419' }[me.T.skill];
+    circle(B.x, B.y + 4, B.r, 'rgba(0,0,0,.15)');
+    circle(B.x, B.y, B.r, sr ? col : 'rgba(200,200,200,.9)');
+    if (!sr) {
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.beginPath();
+      ctx.arc(B.x, B.y, B.r - 5, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (1 - me.scd / me.T.scd)); ctx.stroke();
+    }
+    text(me.T.icon, B.x, B.y - 7, 20);
+    text(me.T.skillName, B.x, B.y + 15, 11, '#fff');
+  }
 }
 
 // ---------- 장면 ----------
@@ -727,6 +854,22 @@ function drawWorld() {
       if (G.cup.holder === d && d.drawMouth) drawCupcake(d.drawMouth.x, d.drawMouth.y, 0.8, d.face * 0.25);
     }
   }
+  for (const sh of G.shots) {
+    if (sh.type === 'fire') {
+      circle(sh.x, sh.y, sh.r + 5, 'rgba(255,146,43,.3)'); circle(sh.x, sh.y, sh.r, '#ff6b1a');
+      circle(sh.x + 1, sh.y - 1, sh.r * 0.55, '#ffd43b'); circle(sh.x + 2, sh.y - 2, sh.r * 0.25, '#fff9db');
+    } else { circle(sh.x, sh.y, sh.r, 'rgba(77,171,247,.9)'); circle(sh.x - 2, sh.y - 2, sh.r * 0.35, '#e7f5ff'); }
+  }
+  for (const b of G.bolts) {
+    const pts = [[b.x1, b.y1]], n = 7, dx = b.x2 - b.x1, dy = b.y2 - b.y1, l = Math.hypot(dx, dy) || 1;
+    for (let i = 1; i < n; i++) { const j = rand(-12, 12); pts.push([b.x1 + dx * i / n - dy / l * j, b.y1 + dy * i / n + dx / l * j]); }
+    pts.push([b.x2, b.y2]);
+    ctx.globalAlpha = 1 - b.t / b.life; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    for (const [w, c] of [[9, 'rgba(255,224,102,.5)'], [4, '#ffd43b'], [1.6, '#fff']]) {
+      ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); pts.forEach(([px, py], i) => i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
   for (const p of G.parts) { ctx.globalAlpha = 1 - p.t / p.life; circle(p.x, p.y, p.s, p.c); }
   ctx.globalAlpha = 1;
   for (const f of G.fx) {
@@ -755,7 +898,8 @@ function drawTitle() {
     drawDog(fake, x - 4, yy + 125, 2.1 * 20 / T.r * (T.r / 20) ** 0.4, { moving: false, hop: sel ? Math.abs(Math.sin(G.t * 6)) * 6 : 0, happy: sel });
     text(T.name, x, yy + 150, 24, '#444');
     text(T.sub, x, yy + 174, 12, '#999', 'center', 'normal');
-    text(T.desc, x, yy + 200, 12.5, '#c45a82');
+    text(T.desc, x, yy + 196, 12.5, '#c45a82');
+    text(T.icon + ' ' + T.skillName, x, yy + 218, 14, { fire: '#e8590c', water: '#1c7ed6', bolt: '#e0a800' }[T.skill]);
   });
 
   // 난이도
@@ -774,8 +918,8 @@ function drawTitle() {
   text(DOGS[ORDER[G.sel]].name + '(으)로 시작!', 0, 0, 21, '#fff');
   ctx.restore();
   text('컵케이크를 물고 있으면 1초마다 냠! · ' + GOAL + '번 먹으면 우승', 240, 714, 13, '#fff', 'center', 'bold', 'rgba(60,110,40,.5)');
-  text('박치기로 친구를 콩! 하면 컵케이크를 떨어뜨려요', 240, 736, 13, '#fff', 'center', 'bold', 'rgba(60,110,40,.5)');
-  text(isTouch ? '폰: 화면을 끌어서 이동 · 💥 버튼으로 박치기' : 'PC: 방향키/WASD 이동 · Space 박치기', 240, 766, 12, 'rgba(255,255,255,.85)', 'center', 'normal');
+  text('박치기나 🔥💧⚡ 필살기에 맞으면 컵케이크를 떨어뜨려요', 240, 736, 13, '#fff', 'center', 'bold', 'rgba(60,110,40,.5)');
+  text(isTouch ? '폰: 끌어서 이동 · 💥 박치기 · 필살기 버튼' : 'PC: 방향키/WASD 이동 · Space 박치기 · K 필살기', 240, 766, 12, 'rgba(255,255,255,.85)', 'center', 'normal');
 }
 
 function titleTap(p) {

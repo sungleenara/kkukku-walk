@@ -78,6 +78,11 @@
   .dog h3{margin:0;font-size:24px}
   .dog .kind{color:var(--sub);font-size:14px;margin-bottom:10px}
   .dog .tag{display:inline-block;background:var(--pink-l);color:var(--pink-d);font-weight:700;font-size:14px;padding:4px 12px;border-radius:999px;margin-bottom:14px}
+  .skill{border-radius:16px;padding:10px 12px;margin:0 0 14px;font-size:14px;font-weight:700}
+  .skill small{display:block;font-weight:500;color:var(--sub);margin-top:2px}
+  .skill.fire{background:#fff1e6;color:#e8590c}
+  .skill.water{background:#e7f5ff;color:#1c7ed6}
+  .skill.bolt{background:#fff9db;color:#b08800}
   .stat{display:flex;align-items:center;gap:10px;font-size:14px;margin:6px 0;text-align:left}
   .stat b{width:56px;flex:none;color:var(--sub);font-weight:600}
   .bar{flex:1;height:10px;background:#f6e6ec;border-radius:99px;overflow:hidden}
@@ -146,7 +151,7 @@
       <canvas class="d3" data-dog="nutti" data-face="-1"></canvas>
     </div>
     <h1>컵케이크 쟁탈전!</h1>
-    <p class="lead">귀리, 꾸꾸, 누띠의 귀여운 컵케이크 싸움 🐾</p>
+    <p class="lead">귀리, 꾸꾸, 누띠의 귀여운 컵케이크 싸움 🐾<br>🔥 불 · 💧 물 · ⚡ 번개 필살기로 컵케이크를 지켜라!</p>
     <a class="btn" href="play.html">▶ 지금 바로 플레이</a>
     <a class="btn ghost" href="#howto">게임하는 법 보기</a>
     <div class="badges">
@@ -173,9 +178,10 @@
       <div class="side">
         <h3>빠른 조작 요약</h3>
         <ul class="quick">
-          <li>📱 <b>폰</b> — 화면을 손가락으로 끌어서 이동, 오른쪽 아래 <b>💥 박치기</b> 버튼</li>
+          <li>📱 <b>폰</b> — 화면을 손가락으로 끌어서 이동, 오른쪽 아래 <b>💥 박치기</b> · <b>🔥💧⚡ 필살기</b> 버튼</li>
           <li>💻 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / 방향키 — 이동</li>
-          <li>💻 <kbd>Space</kbd> 또는 클릭 — 박치기</li>
+          <li>💻 <kbd>Space</kbd> 또는 왼클릭 — 박치기</li>
+          <li>💻 <kbd>K</kbd> 또는 오른클릭 — 필살기 (불 · 물 · 번개)</li>
           <li>💻 타이틀에서 <kbd>←</kbd><kbd>→</kbd> 강아지 고르기, <kbd>↑</kbd><kbd>↓</kbd> 난이도</li>
         </ul>
         <div class="note">
@@ -197,7 +203,8 @@
         <canvas data-dog="gwiri" data-happy="1"></canvas>
         <h3>귀리</h3>
         <div class="kind">베이지색 · 제일 작은 포메라니안</div>
-        <div class="tag">⚡ 제일 작고 제일 빨라요</div>
+        <div class="tag">💨 제일 작고 제일 빨라요</div>
+        <div class="skill fire">🔥 필살기: 불꽃 발사<small>불덩이를 멀리 쏴요. 맞으면 앗뜨! 멀리 날아가요</small></div>
         <div class="stat"><b>빠르기</b><span class="bar"><i style="width:100%"></i></span></div>
         <div class="stat"><b>버티기</b><span class="bar"><i style="width:40%"></i></span></div>
         <div class="stat"><b>박치기</b><span class="bar"><i style="width:65%"></i></span></div>
@@ -207,6 +214,7 @@
         <h3>꾸꾸</h3>
         <div class="kind">흰색 · 하얀 스피츠</div>
         <div class="tag">🪨 묵직해서 잘 안 밀려요</div>
+        <div class="skill water">💧 필살기: 물대포<small>물줄기를 부채꼴로 촤아! 가까이 있는 친구를 밀어내요</small></div>
         <div class="stat"><b>빠르기</b><span class="bar"><i style="width:70%"></i></span></div>
         <div class="stat"><b>버티기</b><span class="bar"><i style="width:100%"></i></span></div>
         <div class="stat"><b>박치기</b><span class="bar"><i style="width:75%"></i></span></div>
@@ -216,6 +224,7 @@
         <h3>누띠</h3>
         <div class="kind">베이지+흰색 · 스피츠와 치와와 믹스</div>
         <div class="tag">💥 박치기가 제일 세요</div>
+        <div class="skill bolt">⚡ 필살기: 번개<small>바라보는 쪽 친구에게 번쩍! 제일 오래 찌릿찌릿 못 움직여요</small></div>
         <div class="stat"><b>빠르기</b><span class="bar"><i style="width:80%"></i></span></div>
         <div class="stat"><b>버티기</b><span class="bar"><i style="width:65%"></i></span></div>
         <div class="stat"><b>박치기</b><span class="bar"><i style="width:100%"></i></span></div>
@@ -231,8 +240,9 @@
     <div class="steps">
       <div class="step"><div><b>강아지 고르기</b><span>귀리, 꾸꾸, 누띠 중 한 마리를 골라요. 나머지 두 마리는 컴퓨터가 움직여요.</span></div></div>
       <div class="step"><div><b>컵케이크 물기</b><span>돗자리 가운데 컵케이크에 다가가면 "앙!" 하고 물어요.</span></div></div>
-      <div class="step"><div><b>냠냠 점수 모으기</b><span>물고 있는 동안 1초마다 "냠!" 하고 1점. 12점을 먼저 모으면 우승!</span></div></div>
+      <div class="step"><div><b>냠냠 점수 모으기</b><span>물고 있는 동안 1초마다 "냠!" 하고 1점. 10점을 먼저 모으면 우승!</span></div></div>
       <div class="step"><div><b>박치기로 뺏기</b><span>컵케이크를 문 친구에게 박치기하면 "콩!" 하고 컵케이크가 튕겨 나가요.</span></div></div>
+      <div class="step"><div><b>필살기 쏘기</b><span>귀리는 🔥 불, 꾸꾸는 💧 물, 누띠는 ⚡ 번개! 맞은 친구도 컵케이크를 떨어뜨려요. 쓰고 나면 잠깐 기다려야 해요.</span></div></div>
       <div class="step"><div><b>60초가 끝나면</b><span>시간이 다 되면 점수가 가장 높은 강아지가 이겨요. 같으면 사이좋게 무승부!</span></div></div>
     </div>
   </div>
@@ -246,7 +256,8 @@
       <div class="card"><div class="ico">🛡️</div><h3>물자마자 잠깐 무적</h3><p>컵케이크를 막 물었을 때는 박치기를 맞아도 안 떨어뜨려요. 그 사이에 도망가세요!</p></div>
       <div class="card"><div class="ico">🐢</div><h3>물면 조금 느려져요</h3><p>컵케이크를 문 강아지는 살짝 느려요. 벽 쪽으로 몰리지 않게 돌돌 돌면서 도망가요.</p></div>
       <div class="card"><div class="ico">💫</div><h3>맞으면 어질어질</h3><p>박치기를 맞으면 잠깐 못 움직여요. 서로 동시에 박으면 둘 다 꽈당!</p></div>
-      <div class="card"><div class="ico">⏳</div><h3>박치기는 쿨타임이 있어요</h3><p>버튼 둘레의 하얀 테두리가 다 차야 다시 박치기할 수 있어요. 아껴 쓰세요.</p></div>
+      <div class="card"><div class="ico">⏳</div><h3>쿨타임을 확인하세요</h3><p>박치기와 필살기 버튼 둘레의 하얀 테두리가 다 차야 다시 쓸 수 있어요. 아껴 쓰세요.</p></div>
+      <div class="card"><div class="ico">🎯</div><h3>필살기는 보는 방향으로</h3><p>마지막으로 움직인 방향으로 쏘아져요. 친구 쪽으로 살짝 움직인 다음 쏘면 잘 맞아요.</p></div>
     </div>
   </div>
 </section>
