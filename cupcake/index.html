@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>컵케이크 쟁탈전 - 강아지 세 마리의 귀여운 컵케이크 싸움</title>
+<meta name="description" content="귀리, 꾸꾸, 누띠 세 강아지가 컵케이크 하나를 두고 콩콩 박치기! 설치 없이 폰과 PC 브라우저에서 바로 하는 무료 게임.">
+<meta property="og:title" content="🧁 컵케이크 쟁탈전">
+<meta property="og:description" content="귀리, 꾸꾸, 누띠 세 강아지의 귀여운 컵케이크 싸움! 폰에서 바로 플레이하세요.">
+<meta name="theme-color" content="#ff8fb1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧁</text></svg>">
+<style>
+  :root{
+    --bg:#fff7fa; --card:#ffffff; --ink:#3d2f36; --sub:#85707b;
+    --pink:#ff6b8b; --pink-d:#e0507a; --pink-l:#ffd6e2; --cream:#fff3c4;
+    --green:#86cc66; --green-d:#3d6b2c; --line:#f3dfe7;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:system-ui,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;line-height:1.65;word-break:keep-all}
+  a{color:inherit}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+
+  header{position:sticky;top:0;z-index:10;background:rgba(255,247,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  header .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .logo{font-weight:800;font-size:20px;color:var(--pink-d);text-decoration:none}
+  nav a{margin-left:18px;text-decoration:none;color:var(--sub);font-weight:600;font-size:15px}
+  nav a:hover{color:var(--pink-d)}
+
+  /* 히어로 */
+  .hero{position:relative;overflow:hidden;
+    background:
+      repeating-linear-gradient(0deg,rgba(255,120,150,.16) 0 22px,transparent 22px 44px),
+      repeating-linear-gradient(90deg,rgba(255,120,150,.16) 0 22px,transparent 22px 44px),#fff6f8}
+  .hero .wrap{position:relative;text-align:center;padding:56px 20px 70px}
+  .trio{display:flex;justify-content:center;align-items:flex-end;gap:4px;margin-bottom:6px}
+  .trio canvas{width:120px;height:120px;display:block}
+  .trio .cup{width:70px;height:70px;animation:bob 1.6s ease-in-out infinite}
+  .trio .d1{animation:hop .9s ease-in-out infinite}
+  .trio .d3{animation:hop .9s ease-in-out infinite .45s}
+  @keyframes hop{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-6px) rotate(4deg)}}
+  .hero h1{font-size:clamp(38px,8vw,64px);margin:6px 0 4px;color:#fff;line-height:1.2;
+    text-shadow:0 3px 0 var(--pink-d),0 6px 14px rgba(224,80,122,.25)}
+  .hero p.lead{font-size:clamp(16px,2.4vw,20px);color:#6b3c50;margin:0 0 28px;font-weight:700}
+  .btn{display:inline-block;background:var(--pink);color:#fff;text-decoration:none;font-weight:800;border:0;cursor:pointer;
+    padding:15px 34px;border-radius:999px;font-size:18px;box-shadow:0 5px 0 var(--pink-d);transition:transform .1s;font-family:inherit}
+  .btn:hover{transform:translateY(-2px)}
+  .btn.ghost{background:#fff;color:var(--pink-d);box-shadow:0 5px 0 #f0cbd8;margin-left:10px}
+  .badges{margin-top:26px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .badges span{background:#fff;padding:6px 14px;border-radius:999px;font-size:14px;font-weight:600;border:1px solid var(--line)}
+
+  section{padding:72px 0;scroll-margin-top:60px}
+  section.alt{background:#fff}
+  h2{font-size:clamp(26px,4vw,34px);margin:0 0 8px;text-align:center}
+  .sub{text-align:center;color:var(--sub);margin:0 0 40px}
+
+  /* 플레이 */
+  .play-area{display:flex;gap:36px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
+  .phone{width:min(400px,100%);aspect-ratio:480/800;background:#2c2229;border-radius:34px;padding:12px;box-shadow:0 20px 40px rgba(120,40,70,.2)}
+  .phone iframe{width:100%;height:100%;border:0;border-radius:24px;display:block;background:var(--green)}
+  .side{max-width:380px;flex:1 1 300px}
+  .side h3{margin:0 0 10px}
+  .quick{padding-left:20px}
+  .quick li{margin-bottom:6px}
+  .note{background:var(--cream);border:1px dashed #f0d77a;border-radius:14px;padding:14px 16px;font-size:14px;color:#6b5434;margin-top:16px}
+  kbd{display:inline-block;min-width:26px;text-align:center;padding:2px 8px;border-radius:7px;background:#fff;
+    border:1px solid #e3cdd6;border-bottom-width:3px;font-family:inherit;font-weight:700;font-size:14px}
+  .mobile-play{display:none;text-align:center;margin-bottom:28px}
+  .mobile-play .btn{width:100%;max-width:420px;font-size:20px;padding:18px}
+  .mobile-play p{color:var(--sub);font-size:14px;margin:12px 0 0}
+
+  /* 강아지 카드 */
+  .dogs{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  .dog{background:var(--bg);border:1px solid var(--line);border-radius:24px;padding:22px 22px 24px;text-align:center}
+  .dog canvas{width:150px;height:150px;display:block;margin:0 auto 4px}
+  .dog h3{margin:0;font-size:24px}
+  .dog .kind{color:var(--sub);font-size:14px;margin-bottom:10px}
+  .dog .tag{display:inline-block;background:var(--pink-l);color:var(--pink-d);font-weight:700;font-size:14px;padding:4px 12px;border-radius:999px;margin-bottom:14px}
+  .stat{display:flex;align-items:center;gap:10px;font-size:14px;margin:6px 0;text-align:left}
+  .stat b{width:56px;flex:none;color:var(--sub);font-weight:600}
+  .bar{flex:1;height:10px;background:#f6e6ec;border-radius:99px;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--pink);border-radius:99px}
+
+  .grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px}
+  section.alt .card{background:var(--bg)}
+  .card .ico{font-size:40px;line-height:1;margin-bottom:10px}
+  .card h3{margin:0 0 6px;font-size:19px}
+  .card p{margin:0;color:var(--sub);font-size:15px}
+
+  .steps{counter-reset:s;display:grid;gap:16px;max-width:760px;margin:0 auto}
+  .step{display:flex;gap:16px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px}
+  .step::before{counter-increment:s;content:counter(s);flex:none;width:36px;height:36px;border-radius:50%;
+    background:var(--pink);color:#fff;font-weight:800;display:grid;place-items:center}
+  .step b{display:block;margin-bottom:2px}
+  .step span{color:var(--sub);font-size:15px}
+
+  details{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 20px;margin:0 auto 12px;max-width:760px}
+  section.alt details{background:var(--bg)}
+  summary{font-weight:700;cursor:pointer}
+  details p{margin:10px 0 0;color:var(--sub)}
+
+  .share{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#3d2f36;color:#fff;
+    padding:10px 18px;border-radius:999px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:20}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  footer{background:#5a3a48;color:#f3dce5;text-align:center;padding:40px 20px;font-size:14px}
+  footer .big{font-size:22px;font-weight:800;color:#fff;margin-bottom:6px}
+  footer a{color:#fff}
+
+  @media (max-width:640px){
+    nav{display:none}
+    .btn.ghost{margin:12px 0 0}
+    section{padding:56px 0}
+    .wrap{padding:0 16px}
+    .trio canvas{width:92px;height:92px}
+    .trio .cup{width:54px;height:54px}
+    .mobile-play{display:block}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="logo" href="#top">🧁 컵케이크 쟁탈전</a>
+    <nav>
+      <a href="#play">게임하기</a>
+      <a href="#dogs">강아지들</a>
+      <a href="#howto">게임하는 법</a>
+      <a href="#tips">꿀팁</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero" id="top">
+  <div class="wrap">
+    <div class="trio" aria-hidden="true">
+      <canvas class="d1" data-dog="gwiri"></canvas>
+      <canvas class="cup" data-cup></canvas>
+      <canvas class="d2" data-dog="kkukku" data-face="-1"></canvas>
+      <canvas class="d3" data-dog="nutti" data-face="-1"></canvas>
+    </div>
+    <h1>컵케이크 쟁탈전!</h1>
+    <p class="lead">귀리, 꾸꾸, 누띠의 귀여운 컵케이크 싸움 🐾</p>
+    <a class="btn" href="play.html">▶ 지금 바로 플레이</a>
+    <a class="btn ghost" href="#howto">게임하는 법 보기</a>
+    <div class="badges">
+      <span>📱 폰 · 💻 PC 모두 OK</span>
+      <span>⚡ 설치 없이 바로</span>
+      <span>⏱ 한 판 1분</span>
+      <span>🆓 무료</span>
+    </div>
+  </div>
+</div>
+
+<section id="play">
+  <div class="wrap">
+    <h2>🎮 바로 플레이하기</h2>
+    <p class="sub">강아지를 고르고 시작 버튼을 누르면 바로 싸움이 시작돼요.</p>
+    <div class="mobile-play">
+      <a class="btn" href="play.html">📱 전체 화면으로 플레이</a>
+      <p>폰에서는 전체 화면이 훨씬 편해요!</p>
+    </div>
+    <div class="play-area">
+      <div class="phone">
+        <iframe id="game" src="play.html" title="컵케이크 쟁탈전 게임" allow="autoplay"></iframe>
+      </div>
+      <div class="side">
+        <h3>빠른 조작 요약</h3>
+        <ul class="quick">
+          <li>📱 <b>폰</b> — 화면을 손가락으로 끌어서 이동, 오른쪽 아래 <b>💥 박치기</b> 버튼</li>
+          <li>💻 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / 방향키 — 이동</li>
+          <li>💻 <kbd>Space</kbd> 또는 클릭 — 박치기</li>
+          <li>💻 타이틀에서 <kbd>←</kbd><kbd>→</kbd> 강아지 고르기, <kbd>↑</kbd><kbd>↓</kbd> 난이도</li>
+        </ul>
+        <div class="note">
+          💡 키보드가 안 먹히면 게임 화면을 한 번 클릭해 주세요.<br>
+          🔊 박치기할 때 "왈!" 소리가 나요. 무음 모드에서는 소리가 안 날 수 있어요.<br>
+          <a href="play.html">→ 전체 화면으로 열기</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt" id="dogs">
+  <div class="wrap">
+    <h2>🐶 선수 소개</h2>
+    <p class="sub">셋 다 귀엽지만, 컵케이크 앞에서는 양보가 없어요.</p>
+    <div class="dogs">
+      <div class="dog">
+        <canvas data-dog="gwiri" data-happy="1"></canvas>
+        <h3>귀리</h3>
+        <div class="kind">베이지색 · 제일 작은 포메라니안</div>
+        <div class="tag">⚡ 제일 작고 제일 빨라요</div>
+        <div class="stat"><b>빠르기</b><span class="bar"><i style="width:100%"></i></span></div>
+        <div class="stat"><b>버티기</b><span class="bar"><i style="width:40%"></i></span></div>
+        <div class="stat"><b>박치기</b><span class="bar"><i style="width:65%"></i></span></div>
+      </div>
+      <div class="dog">
+        <canvas data-dog="kkukku" data-happy="1"></canvas>
+        <h3>꾸꾸</h3>
+        <div class="kind">흰색 · 하얀 스피츠</div>
+        <div class="tag">🪨 묵직해서 잘 안 밀려요</div>
+        <div class="stat"><b>빠르기</b><span class="bar"><i style="width:70%"></i></span></div>
+        <div class="stat"><b>버티기</b><span class="bar"><i style="width:100%"></i></span></div>
+        <div class="stat"><b>박치기</b><span class="bar"><i style="width:75%"></i></span></div>
+      </div>
+      <div class="dog">
+        <canvas data-dog="nutti" data-happy="1"></canvas>
+        <h3>누띠</h3>
+        <div class="kind">베이지+흰색 · 스피츠와 치와와 믹스</div>
+        <div class="tag">💥 박치기가 제일 세요</div>
+        <div class="stat"><b>빠르기</b><span class="bar"><i style="width:80%"></i></span></div>
+        <div class="stat"><b>버티기</b><span class="bar"><i style="width:65%"></i></span></div>
+        <div class="stat"><b>박치기</b><span class="bar"><i style="width:100%"></i></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="howto">
+  <div class="wrap">
+    <h2>📖 게임하는 법</h2>
+    <p class="sub">규칙은 딱 하나! 컵케이크를 오래 물고 있는 강아지가 이겨요.</p>
+    <div class="steps">
+      <div class="step"><div><b>강아지 고르기</b><span>귀리, 꾸꾸, 누띠 중 한 마리를 골라요. 나머지 두 마리는 컴퓨터가 움직여요.</span></div></div>
+      <div class="step"><div><b>컵케이크 물기</b><span>돗자리 가운데 컵케이크에 다가가면 "앙!" 하고 물어요.</span></div></div>
+      <div class="step"><div><b>냠냠 점수 모으기</b><span>물고 있는 동안 1초마다 "냠!" 하고 1점. 12점을 먼저 모으면 우승!</span></div></div>
+      <div class="step"><div><b>박치기로 뺏기</b><span>컵케이크를 문 친구에게 박치기하면 "콩!" 하고 컵케이크가 튕겨 나가요.</span></div></div>
+      <div class="step"><div><b>60초가 끝나면</b><span>시간이 다 되면 점수가 가장 높은 강아지가 이겨요. 같으면 사이좋게 무승부!</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="alt" id="tips">
+  <div class="wrap">
+    <h2>🍯 꿀팁</h2>
+    <p class="sub">알고 하면 훨씬 잘 이길 수 있어요.</p>
+    <div class="grid">
+      <div class="card"><div class="ico">🛡️</div><h3>물자마자 잠깐 무적</h3><p>컵케이크를 막 물었을 때는 박치기를 맞아도 안 떨어뜨려요. 그 사이에 도망가세요!</p></div>
+      <div class="card"><div class="ico">🐢</div><h3>물면 조금 느려져요</h3><p>컵케이크를 문 강아지는 살짝 느려요. 벽 쪽으로 몰리지 않게 돌돌 돌면서 도망가요.</p></div>
+      <div class="card"><div class="ico">💫</div><h3>맞으면 어질어질</h3><p>박치기를 맞으면 잠깐 못 움직여요. 서로 동시에 박으면 둘 다 꽈당!</p></div>
+      <div class="card"><div class="ico">⏳</div><h3>박치기는 쿨타임이 있어요</h3><p>버튼 둘레의 하얀 테두리가 다 차야 다시 박치기할 수 있어요. 아껴 쓰세요.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <h2>❓ 자주 묻는 질문</h2>
+    <p class="sub">궁금한 점이 있으면 여기부터 확인해 주세요.</p>
+    <details><summary>설치해야 하나요?</summary><p>아니요. 이 페이지 주소만 열면 폰, 태블릿, PC 브라우저에서 바로 할 수 있어요.</p></details>
+    <details><summary>폰 홈 화면에 앱처럼 추가할 수 있나요?</summary><p>네! 아이폰 사파리는 공유 버튼 → "홈 화면에 추가", 안드로이드 크롬은 ⋮ 메뉴 → "홈 화면에 추가"를 누르면 앱처럼 바로 열 수 있어요.</p></details>
+    <details><summary>너무 어렵거나 쉬워요.</summary><p>타이틀 화면에서 난이도를 쉬움 · 보통 · 어려움 중에 고를 수 있어요.</p></details>
+    <details><summary>친구랑 같이 할 수 있나요?</summary><p>지금은 혼자서 컴퓨터 강아지 두 마리와 겨루는 방식이에요.</p></details>
+    <details><summary>소리가 안 나요.</summary><p>폰이 무음 모드면 소리가 안 날 수 있어요. 무음을 끄고 화면을 한 번 탭해 주세요.</p></details>
+    <div class="share">
+      <button class="btn" id="shareBtn" type="button">🔗 친구에게 공유하기</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="big">🧁 컵케이크 쟁탈전</div>
+  <div>귀리 · 꾸꾸 · 누띠와 함께 만든 작은 게임</div>
+  <div style="margin-top:10px"><a href="../">🐾 꾸꾸산책 게임도 해 보기 →</a></div>
+</footer>
+
+<div class="toast" id="toast">주소를 복사했어요!</div>
+
+<script>
+// 게임 화면(play.html)에 있는 그림 그리기 기능을 빌려서 강아지 그림을 그려요
+function paintAll(win) {
+  try {
+    document.querySelectorAll('canvas[data-dog]').forEach(c =>
+      win.renderDogPortrait(c.dataset.dog, c, { happy: c.dataset.happy === '1', face: +(c.dataset.face || 1) }));
+    document.querySelectorAll('canvas[data-cup]').forEach(c => win.renderCupcakeIcon(c));
+  } catch (e) {}
+}
+const frame = document.getElementById('game');
+function tryPaint() { const w = frame.contentWindow; if (w && w.renderDogPortrait) paintAll(w); else setTimeout(tryPaint, 200); }
+frame.addEventListener('load', tryPaint);
+tryPaint();
+let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(tryPaint, 200); });
+
+// 공유하기
+const toast = document.getElementById('toast');
+document.getElementById('shareBtn').addEventListener('click', async () => {
+  const data = { title: '🧁 컵케이크 쟁탈전', text: '귀리, 꾸꾸, 누띠의 귀여운 컵케이크 싸움! 같이 해 보자', url: location.href.split('#')[0] };
+  try {
+    if (navigator.share) { await navigator.share(data); return; }
+    await navigator.clipboard.writeText(data.url);
+    toast.classList.add('on'); setTimeout(() => toast.classList.remove('on'), 1600);
+  } catch (e) {}
+});
+</script>
+</body>
+</html>
